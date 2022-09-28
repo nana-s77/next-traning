@@ -1,23 +1,36 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
-import { GetStaticProps } from 'next'
+import type { NextPage } from "next";
+import Head from "next/head";
+import Image from "next/image";
+import styles from "../styles/Home.module.css";
+import {
+  GetStaticProps,
+  GetStaticPropsContext,
+  InferGetStaticPropsType,
+} from "next";
 
-type Props = {
-  date: string
-}
+type Props = InferGetStaticPropsType<typeof getStaticProps>;
 
-export const getStaticProps: GetStaticProps<Props> = () => {
-  const date: string = new Date().toISOString();
-  console.log(date);
+const https = require("https");
+const LATEST_STORY_URL =
+  "https://hacker-news.firebaseio.com/v0/maxitem.json?print=pretty";
+
+const ITEM_URL =
+  "https://hacker-news.firebaseio.com/v0/item/8863.json?print=pretty";
+
+export const getStaticProps = async () => {
+  const res = await fetch(ITEM_URL);
+  const posts = await res.json();
+
+  console.log(posts);
+  console.log(new Date().toISOString());
 
   return {
-     props: { date } 
-  } 
-} 
+    props: { posts },
+    revalidate: 10,
+  };
+};
 
-const Home: NextPage<Props> = ({ date }) => {
+const Home = ({ posts }: Props) => {
   return (
     <div className={styles.container}>
       <Head>
@@ -26,13 +39,13 @@ const Home: NextPage<Props> = ({ date }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <p>{date}</p>
+        <p>{posts.title}</p>
         <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
 
         <p className={styles.description}>
-          Get started by editing{' '}
+          Get started by editing{" "}
           <code className={styles.code}>pages/index.tsx</code>
         </p>
 
@@ -73,14 +86,14 @@ const Home: NextPage<Props> = ({ date }) => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
+          Powered by{" "}
           <span className={styles.logo}>
             <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
           </span>
         </a>
       </footer>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
